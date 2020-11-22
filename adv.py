@@ -28,7 +28,35 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
+change_direction = {'n': 'e', 'e': 's', 's': 'w', 'w': 'n'}
+inverse = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
+room_map = {}
+add_room(player.current_room)
 
+while len(room_map) < len(room_graph):
+    room = player.current_room
+    exits = room.get_exits()
+    explored = False
+    direction = 's'
+
+    for _ in range(len(change_direction)):
+        if room_map[room][direction] == '?' and direction in exits:
+            explored = True
+            player.travel(direction)
+            next_room = player.current_room
+            traversal_path.append(direction)
+            if not add_room(next_room):
+                player.travel(inverse[direction])
+                traversal_path.pop()
+            add_relation(room, direction, next_room)
+            break
+        else:
+            direction = change_direction[direction]
+    if not explored:
+        path = get_path(room)
+        traversal_path.extend(path)
+        for direction in path:
+            player.travel(direction)
 
 
 # TRAVERSAL TEST - DO NOT MODIFY
