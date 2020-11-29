@@ -28,35 +28,32 @@ player = Player(world.starting_room)
 # Fill this out with directions to walk
 # traversal_path = ['n', 'n']
 traversal_path = []
-change_direction = {'n': 'e', 'e': 's', 's': 'w', 'w': 'n'}
-inverse = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
-room_map = {}
-add_room(player.current_room)
+opposite_directions = {'n': 's', 's': 'n', 'e': 'w', 'w': 'e'}
 
-while len(room_map) < len(room_graph):
-    room = player.current_room
-    exits = room.get_exits()
-    explored = False
-    direction = 's'
+reversed_transversal = [None]
+visitedSoFar = {}
 
-    for _ in range(len(change_direction)):
-        if room_map[room][direction] == '?' and direction in exits:
-            explored = True
-            player.travel(direction)
-            next_room = player.current_room
-            traversal_path.append(direction)
-            if not add_room(next_room):
-                player.travel(inverse[direction])
-                traversal_path.pop()
-            add_relation(room, direction, next_room)
-            break
+while len(visitedSoFar) < len(room_graph) - 1:
+
+    if player.current_room.id not in visitedSoFar:
+        visitedSoFar[player.current_room.id] = player.current_room.get_exits()
+
+        if reversed_transversal[-1]:
+            visitedSoFar[player.current_room.id].remove(
+                reversed_transversal[-1])
+
         else:
-            direction = change_direction[direction]
-    if not explored:
-        path = get_path(room)
-        traversal_path.extend(path)
-        for direction in path:
-            player.travel(direction)
+            continue
+
+    while len(visitedSoFar[player.current_room.id]) == 0:
+        previous_path = reversed_transversal.pop()
+        traversal_path.append(previous_path)
+        player.travel(previous_path)
+
+    next_direction = visitedSoFar[player.current_room.id].pop()
+    traversal_path.append(next_direction)
+    reversed_transversal.append(opposite_directions[next_direction])
+    player.travel(next_direction)
 
 
 # TRAVERSAL TEST - DO NOT MODIFY
